@@ -20,6 +20,8 @@ const makeGallery = galleryItems.map(makeGalleryElMarkup).join("");
 
 gallery.insertAdjacentHTML("beforeend", makeGallery);
 
+gallery.addEventListener("click", onImageClick);
+
 function onImageClick(event) {
   event.preventDefault();
   if (event.target.nodeName !== "IMG") {
@@ -29,22 +31,21 @@ function onImageClick(event) {
   const img = event.target;
   const imgUrl = img.getAttribute("data-source");
 
-  const instance = basicLightbox.create(`
-    <img src="${imgUrl}" width="800" height="600">
-`);
+  const instance = basicLightbox.create(
+    `<img src="${imgUrl}" width="800" height="600">`,
+    {
+      onShow: () => document.addEventListener("keydown", onClose),
+      onClose: () => document.removeEventListener("keydown", onClose),
+    }
+  );
 
   instance.show();
 
-  let visible = instance.visible();
-
-  document.addEventListener("keydown", (event) => {
-    if (event.code === "Escape" && visible) {
-      visible = false;
+  function onClose(event) {
+    if (event.code === "Escape") {
       instance.close();
     }
-  });
+  }
 }
-
-gallery.addEventListener("click", onImageClick);
 
 console.log(galleryItems);
